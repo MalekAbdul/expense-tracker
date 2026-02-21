@@ -44,7 +44,21 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+        //
+        });
+
+        $this->renderable(function (\PDOException $e) {
+            if (str_contains($e->getMessage(), 'SQLSTATE[HY000] [2002]')) {
+                return response()->view('errors.db_error', [], 500);
+            }
+        });
+
+        $this->renderable(function (Throwable $e) {
+            if (app()->environment('production')) {
+                return response()->view('errors.db_error', [
+                'message' => 'Something went wrong on our end.'
+                ], 500);
+            }
         });
     }
 }
